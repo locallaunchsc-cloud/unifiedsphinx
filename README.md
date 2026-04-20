@@ -131,7 +131,9 @@ const { decision, risk, reasons } = await res.json();
 
 ### Listing on Agentic.Market
 
-Services auto-index after the first payment settles through Coinbase's CDP facilitator. To complete the listing:
+**Status: pending v2 SDK migration.** The `/v1/scan` endpoint is fully x402-compliant and verified end-to-end (auth, EIP-712 signing, payment payload). Final settlement against the public x402.org facilitator currently fails on its relayer's gas estimation; CDP-facilitator settlement requires migrating from `x402-express`/`x402-axios` v1 to `@x402/express`/`@x402/axios` v2 (CDP dropped v1 facilitator support). Migration tracked separately.
+
+Services auto-index after the first payment settles through Coinbase's CDP facilitator. To complete the listing once on v2:
 
 1. Sign up for [Coinbase Developer Platform](https://portal.cdp.coinbase.com/) and create an API key. Save the **Key ID** and **Secret** somewhere safe (the secret is only shown once).
 2. Copy `services/api/.env.example` to `.env` and fill in `CDP_API_KEY_SECRET` (the Key ID is already set).
