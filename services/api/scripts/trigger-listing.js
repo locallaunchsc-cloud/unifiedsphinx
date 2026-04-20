@@ -35,11 +35,12 @@ try {
   /* dotenv not installed — env vars must come from the shell */
 }
 
-const axios = require('axios');
-const { createWalletClient, createPublicClient, http, parseAbi, formatUnits, privateKeyToAccount: _unused } = require('viem');
+const { createWalletClient, createPublicClient, http, parseAbi, formatUnits } = require('viem');
 const { privateKeyToAccount, generatePrivateKey } = require('viem/accounts');
 const { baseSepolia } = require('viem/chains');
-const { withPaymentInterceptor } = require('x402-axios');
+const { wrapFetchWithPaymentFromConfig } = require('@x402/fetch');
+const { ExactEvmScheme } = require('@x402/evm');
+const axios = require('axios');
 
 // ---- Config ----------------------------------------------------------------
 
@@ -163,7 +164,7 @@ function loadBuyer() {
     process.exit(2);
   }
 
-  // 2. Build axios client with x402 interceptor and call the paid route.
+  // 2. Build fetch client with x402 interceptor and call the paid route.
   console.log('Calling POST /v1/scan with payment interceptor ...');
   const walletClient = createWalletClient({
     account,
@@ -171,9 +172,13 @@ function loadBuyer() {
     transport: http(),
   });
 
-  const api = withPaymentInterceptor(
-    axios.create({ baseURL: API_BASE_URL, timeout: 30000 }),
-    walletClient,
+  const fetchWithPayment = wrapFetchWithPaymentFromConfig(
+    globalThis.fetch,
+    {
+      schemes: [
+        { network: 'eip155:84532', client: new ExactEvmScheme(walletClient) },
+      ],
+    },
   );
 
   const probePayload = {
@@ -187,24 +192,30 @@ function loadBuyer() {
 
   let scanRes;
   try {
-    scanRes = await api.post('/v1/scan', probePayload);
+    const resp = await fetchWithPayment(`${API_BASE_URL}/v1/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(probePayload),
+    });
+    if (!resp.ok) {
+      const body = await resp.text();
+      throw Object.assign(new Error(`HTTP ${resp.status}`), { responseBody: body, status: resp.status });
+    }
+    scanRes = { status: resp.status, data: await resp.json() };
   } catch (err) {
     const lines = ['\nPaid call failed:'];
-    if (err.response) {
-      lines.push(`  status: ${err.response.status}`);
-      lines.push(`  body:   ${JSON.stringify(err.response.data, null, 2)}`);
+    if (err.status) {
+      lines.push(`  status: ${err.status}`);
+      lines.push(`  body:   ${err.responseBody}`);
     } else {
       lines.push(`  message: ${err.message}`);
       if (err.stack) lines.push(`  stack:   ${err.stack}`);
-      if (err.cause) lines.push(`  cause:   ${JSON.stringify(err.cause, null, 2)}`);
     }
     const out = lines.join('\n');
     console.error(out);
-    // Persist to disk so libuv teardown crashes can't swallow it.
     try {
       fs.writeFileSync(path.join(__dirname, '..', 'last-error.txt'), out);
     } catch (_) {}
-    // Force flush before exit.
     setTimeout(() => process.exit(3), 100);
     return;
   }
