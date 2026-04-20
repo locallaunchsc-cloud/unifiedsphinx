@@ -261,6 +261,14 @@ app.get('/x402-info', (_, res) => {
 
 app.listen(PORT, HOST, () => {
   console.log(`UnifiedSphinx API listening on ${HOST}:${PORT}`);
+  console.log(
+    `[x402] facilitator=${facilitatorMode} payTo=${PAY_TO} network=${NETWORK}`,
+  );
+  if (facilitatorMode !== 'cdp') {
+    console.log(
+      '[x402] WARNING: not using CDP facilitator. Agentic.Market will NOT index this service. Set CDP_API_KEY_SECRET and restart.',
+    );
+  }
   seedDemo();
   startLiveFeed();
 });
