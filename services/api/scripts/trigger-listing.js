@@ -48,7 +48,7 @@ const PAY_TO =
   process.env.X402_PAY_TO || '0xaFa55F80461eB78d02E66dcf729F01f995CCa208';
 const USDC_BASE_SEPOLIA = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
 const CDP_KEY_ID =
-  process.env.CDP_API_KEY_ID || '80d57fd8-9b85-402b-a6c1-4b9141efa010';
+  process.env.CDP_API_KEY_ID || '342a68be-3728-4a47-afc9-bdb969b0f1cc';
 const CDP_KEY_SECRET = process.env.CDP_API_KEY_SECRET;
 
 // ---- Helpers ---------------------------------------------------------------
