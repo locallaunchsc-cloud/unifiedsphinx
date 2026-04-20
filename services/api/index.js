@@ -9,7 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 const { evaluateEvent } = require('./policyEngine');
 const { scoreRisk } = require('./detection');
 const { SEED_EVENTS } = require('./seed');
-const { attachX402, PAY_TO, NETWORK } = require('./x402');
+const { attachX402, PAY_TO, NETWORK, facilitatorMode } = require('./x402');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -246,7 +246,11 @@ app.get('/x402-info', (_, res) => {
   res.json({
     payTo: PAY_TO,
     network: NETWORK,
-    facilitator: 'https://x402.org/facilitator',
+    facilitatorMode,
+    facilitator:
+      facilitatorMode === 'cdp'
+        ? 'https://api.cdp.coinbase.com/platform/v2/x402'
+        : 'https://x402.org/facilitator',
     routes: {
       paid: { method: 'POST', path: '/v1/scan', price: '$0.0005' },
       free: { method: 'POST', path: '/v1/scan-public', limit: '30/min/ip' },
