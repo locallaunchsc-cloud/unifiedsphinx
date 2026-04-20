@@ -100,15 +100,32 @@ function ensureSecret() {
   }
 }
 
+const fs = require('fs');
+const BUYER_KEY_FILE = path.join(__dirname, '..', '.buyer-key');
+
 function loadBuyer() {
   let pk = process.env.BUYER_PRIVATE_KEY;
   let generated = false;
+  let source = 'env';
+
+  if (!pk && fs.existsSync(BUYER_KEY_FILE)) {
+    pk = fs.readFileSync(BUYER_KEY_FILE, 'utf8').trim();
+    source = 'file';
+  }
+
   if (!pk) {
     pk = generatePrivateKey();
     generated = true;
+    source = 'generated';
+    try {
+      fs.writeFileSync(BUYER_KEY_FILE, pk, { mode: 0o600 });
+    } catch (e) {
+      console.warn(`  (could not persist buyer key: ${e.message})`);
+    }
   }
+
   const account = privateKeyToAccount(pk);
-  return { account, pk, generated };
+  return { account, pk, generated, source };
 }
 
 // ---- Main ------------------------------------------------------------------
@@ -117,13 +134,14 @@ function loadBuyer() {
   console.log('UnifiedSphinx → Agentic.Market listing trigger\n');
   ensureSecret();
 
-  const { account, pk, generated } = loadBuyer();
+  const { account, generated, source } = loadBuyer();
   console.log(`Buyer wallet:     ${account.address}`);
   if (generated) {
     console.log(
-      '  (generated fresh — save this private key if you want to reuse it)',
+      `  (generated fresh and saved to services/api/.buyer-key for reuse)`,
     );
-    console.log(`  BUYER_PRIVATE_KEY=${pk}`);
+  } else {
+    console.log(`  (loaded from ${source})`);
   }
   console.log(`Pay-to wallet:    ${PAY_TO}`);
   console.log(`Network:          base-sepolia`);
