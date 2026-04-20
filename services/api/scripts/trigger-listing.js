@@ -190,14 +190,24 @@ function loadBuyer() {
   try {
     scanRes = await api.post('/v1/scan', probePayload);
   } catch (err) {
-    console.error('\nPaid call failed:');
+    const lines = ['\nPaid call failed:'];
     if (err.response) {
-      console.error(`  status: ${err.response.status}`);
-      console.error(`  body:   ${JSON.stringify(err.response.data, null, 2)}`);
+      lines.push(`  status: ${err.response.status}`);
+      lines.push(`  body:   ${JSON.stringify(err.response.data, null, 2)}`);
     } else {
-      console.error(`  ${err.message}`);
+      lines.push(`  message: ${err.message}`);
+      if (err.stack) lines.push(`  stack:   ${err.stack}`);
+      if (err.cause) lines.push(`  cause:   ${JSON.stringify(err.cause, null, 2)}`);
     }
-    process.exit(3);
+    const out = lines.join('\n');
+    console.error(out);
+    // Persist to disk so libuv teardown crashes can't swallow it.
+    try {
+      fs.writeFileSync(path.join(__dirname, '..', 'last-error.txt'), out);
+    } catch (_) {}
+    // Force flush before exit.
+    setTimeout(() => process.exit(3), 100);
+    return;
   }
 
   console.log(`  HTTP ${scanRes.status}`);
