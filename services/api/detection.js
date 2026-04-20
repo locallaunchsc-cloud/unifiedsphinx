@@ -17,12 +17,13 @@ const PROMPT_INJECTION_PATTERNS = [
   /override (safety|security)/i,
 ];
 
-// PII patterns
+// PII patterns — sensitive identifiers only.
+// We intentionally do NOT flag plain emails or generic phone numbers here
+// (they are legitimate in most forms); the alert is reserved for things
+// that are almost always a real leak when they appear in a payload.
 const PII_PATTERNS = [
   { type: 'SSN', pattern: /\b\d{3}-\d{2}-\d{4}\b/ },
   { type: 'Credit Card', pattern: /\b(?:\d{4}[\s-]?){3}\d{4}\b/ },
-  { type: 'Email', pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/ },
-  { type: 'Phone', pattern: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/ },
   { type: 'API Key', pattern: /\b(sk-|pk_|api_key|bearer )[A-Za-z0-9_\-]{20,}\b/i },
 ];
 

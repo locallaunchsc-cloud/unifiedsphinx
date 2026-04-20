@@ -1,162 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UnifiedSphinx Dashboard</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
-    header { background: #111; border-bottom: 1px solid #222; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-    .logo { font-size: 1.4rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-    .logo span { color: #a78bfa; }
-    .badge { background: #1a1a2e; color: #a78bfa; border: 1px solid #a78bfa44; border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .card { background: #111; border: 1px solid #222; border-radius: 12px; padding: 24px; }
-    .card-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    .card-value { font-size: 2rem; font-weight: 700; }
-    .score-good { color: #34d399; }
-    .score-warn { color: #fbbf24; }
-    .score-bad { color: #f87171; }
-    .card-sub { font-size: 0.8rem; color: #666; margin-top: 4px; }
-    .section-title { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 16px; }
-    .events-table { background: #111; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #161616; color: #888; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px; text-align: left; }
-    td { padding: 12px 16px; border-top: 1px solid #1a1a1a; font-size: 0.85rem; }
-    .decision-allow { color: #34d399; }
-    .decision-alert { color: #fbbf24; }
-    .decision-block { color: #f87171; }
-    .risk-low { color: #34d399; }
-    .risk-med { color: #fbbf24; }
-    .risk-high { color: #f87171; }
-    .pill { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600; }
-    .pill-allow { background: #34d39922; color: #34d399; }
-    .pill-alert { background: #fbbf2422; color: #fbbf24; }
-    .pill-block { background: #f8717122; color: #f87171; }
-    .controls { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
-    input[type=text] { background: #161616; border: 1px solid #333; color: #e0e0e0; border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; width: 260px; }
-    button { background: #a78bfa; color: #0a0a0a; border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-    button:hover { background: #c4b5fd; }
-    .empty { color: #555; text-align: center; padding: 32px; font-size: 0.9rem; }
-    .refresh-note { color: #555; font-size: 0.75rem; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UnifiedSphinx — Security Dashboard</title>
+<meta name="description" content="Live security dashboard for UnifiedSphinx — real-time events, risk scores, and agent decisions." />
+<meta name="theme-color" content="#07090d" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2300e5ff' d='M16 2 L28 9 L28 19 C28 25 22 29 16 30 C10 29 4 25 4 19 L4 9 Z' opacity='0.95'/%3E%3Cpath fill='%230b0d12' d='M16 9 L22 12 L22 19 C22 22 19 24 16 25 C13 24 10 22 10 19 L10 12 Z'/%3E%3Ccircle cx='16' cy='17' r='2.2' fill='%2300e5ff'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="./dashboard.css" />
 </head>
 <body>
-  <header>
-    <div class="logo">Unified<span>Sphinx</span></div>
-    <div class="badge">Security Dashboard</div>
-  </header>
 
-  <div class="container">
-    <div class="controls">
-      <input type="text" id="siteIdInput" placeholder="Enter Site ID..." value="demo-site-1" />
-      <button onclick="loadSite()">Load Site</button>
-      <span class="refresh-note" id="lastRefresh"></span>
-    </div>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="scanline" aria-hidden="true"></div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="card-label">Security Score</div>
-        <div class="card-value" id="score">--</div>
-        <div class="card-sub">0 = critical, 100 = clean</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Alerts</div>
-        <div class="card-value score-warn" id="alerts">--</div>
-        <div class="card-sub">Suspicious events flagged</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Blocked</div>
-        <div class="card-value score-bad" id="blocked">--</div>
-        <div class="card-sub">Attacks stopped</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Events (last 100)</div>
-        <div class="card-value" id="total">--</div>
-        <div class="card-sub">Total events recorded</div>
+<header class="dash-header">
+  <div class="dash-header-inner">
+    <a href="#" class="logo" aria-label="UnifiedSphinx home">
+      <svg class="logo-mark" width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00e5ff"/>
+            <stop offset="100%" stop-color="#a855f7"/>
+          </linearGradient>
+        </defs>
+        <path d="M16 2 L28 9 L28 19 C28 25 22 29 16 30 C10 29 4 25 4 19 L4 9 Z" stroke="url(#lg)" stroke-width="1.5"/>
+        <path d="M16 9 L22 12 L22 19 C22 22 19 24 16 25 C13 24 10 22 10 19 L10 12 Z" stroke="url(#lg)" stroke-width="1.25" opacity="0.7"/>
+        <circle cx="16" cy="17" r="2.4" fill="url(#lg)"/>
+      </svg>
+      <span class="logo-text">UnifiedSphinx</span>
+      <span class="env-tag">Security</span>
+    </a>
+    <div class="dash-meta">
+      <span class="live-pill" id="live-status">
+        <span class="live-dot"></span>
+        <span id="live-label">Connecting…</span>
+      </span>
+      <div class="site-picker">
+        <label for="siteId" class="site-label">Site</label>
+        <input type="text" id="siteId" value="demo-acme-shop" spellcheck="false" />
       </div>
     </div>
+  </div>
+</header>
 
-    <div class="section-title">Recent Events</div>
-    <div class="events-table">
-      <table>
+<main class="dash-main">
+
+  <section class="kpi-row" aria-label="Site KPIs">
+    <article class="kpi">
+      <p class="kpi-label">Security score</p>
+      <p class="kpi-value" id="k-score">—</p>
+      <div class="kpi-bar"><span id="k-score-bar" style="width:0"></span></div>
+      <p class="kpi-sub" id="k-score-sub">0 = critical · 100 = clean</p>
+    </article>
+    <article class="kpi kpi-alert">
+      <p class="kpi-label">Alerts</p>
+      <p class="kpi-value" id="k-alerts">—</p>
+      <p class="kpi-sub">Suspicious events flagged</p>
+    </article>
+    <article class="kpi kpi-block">
+      <p class="kpi-label">Blocked</p>
+      <p class="kpi-value" id="k-blocked">—</p>
+      <p class="kpi-sub">Attacks stopped cold</p>
+    </article>
+    <article class="kpi">
+      <p class="kpi-label">Events total</p>
+      <p class="kpi-value" id="k-total">—</p>
+      <p class="kpi-sub">Since runtime boot</p>
+    </article>
+  </section>
+
+  <section class="panel panel-sparkline">
+    <header class="panel-header">
+      <h2 class="panel-title">Decision mix — recent events</h2>
+      <div class="legend">
+        <span class="legend-item"><span class="dot dot-allow"></span> Allow</span>
+        <span class="legend-item"><span class="dot dot-alert"></span> Alert</span>
+        <span class="legend-item"><span class="dot dot-block"></span> Block</span>
+      </div>
+    </header>
+    <div class="spark-wrap">
+      <div class="spark" id="spark" role="img" aria-label="Decision mix bar chart"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <header class="panel-header">
+      <h2 class="panel-title">Live event feed</h2>
+      <span class="panel-sub" id="feed-sub">Real-time stream</span>
+    </header>
+    <div class="table-wrap">
+      <table class="events-table" aria-live="polite">
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Type</th>
-            <th>Path</th>
-            <th>IP</th>
-            <th>Risk</th>
-            <th>Decision</th>
-            <th>Reason</th>
+            <th class="col-time">Time</th>
+            <th class="col-type">Type</th>
+            <th class="col-path">Path / Target</th>
+            <th class="col-ip">Source IP</th>
+            <th class="col-risk">Risk</th>
+            <th class="col-decision">Decision</th>
+            <th class="col-reason">Reason</th>
           </tr>
         </thead>
-        <tbody id="eventsBody">
-          <tr><td colspan="7" class="empty">Enter a Site ID and click Load Site</td></tr>
+        <tbody id="events-body">
+          <tr><td class="empty" colspan="7">Waiting for events…</td></tr>
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
 
-  <script>
-    const API_URL = 'http://localhost:3001';
+  <p class="dash-footer">
+    <span class="mono">UnifiedSphinx v0.1</span> · Open source core ·
+    <a href="https://github.com/locallaunchsc-cloud/unifiedsphinx" target="_blank" rel="noopener">github.com/locallaunchsc-cloud/unifiedsphinx</a>
+  </p>
 
-    async function loadSite() {
-      const siteId = document.getElementById('siteIdInput').value.trim();
-      if (!siteId) return;
+</main>
 
-      try {
-        const res = await fetch(API_URL + '/sites/' + siteId + '/status');
-        const data = await res.json();
-
-        const score = data.score || 0;
-        const scoreEl = document.getElementById('score');
-        scoreEl.textContent = score;
-        scoreEl.className = 'card-value ' + (score >= 80 ? 'score-good' : score >= 50 ? 'score-warn' : 'score-bad');
-
-        document.getElementById('alerts').textContent = data.alerts || 0;
-        document.getElementById('blocked').textContent = data.blocked || 0;
-        document.getElementById('total').textContent = (data.recentEvents || []).length;
-        document.getElementById('lastRefresh').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
-
-        renderEvents(data.recentEvents || []);
-      } catch (e) {
-        document.getElementById('eventsBody').innerHTML =
-          '<tr><td colspan="7" class="empty">Could not connect to API. Is the server running?</td></tr>';
-      }
-    }
-
-    function renderEvents(events) {
-      const tbody = document.getElementById('eventsBody');
-      if (!events.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty">No events yet</td></tr>';
-        return;
-      }
-      tbody.innerHTML = events.map(e => {
-        const risk = e.riskScore || 0;
-        const riskClass = risk >= 60 ? 'risk-high' : risk >= 30 ? 'risk-med' : 'risk-low';
-        const dec = e.decision || 'allow';
-        const reason = (e.reasons && e.reasons[0]) || '-';
-        const time = new Date(e.timestamp).toLocaleTimeString();
-        return '<tr>' +
-          '<td>' + time + '</td>' +
-          '<td>' + (e.type || '-') + '</td>' +
-          '<td>' + (e.path || '/') + '</td>' +
-          '<td>' + (e.ip || '-') + '</td>' +
-          '<td class="' + riskClass + '">' + risk + '</td>' +
-          '<td><span class="pill pill-' + dec + '">' + dec.toUpperCase() + '</span></td>' +
-          '<td style="color:#666;font-size:0.78rem">' + reason + '</td>' +
-          '</tr>';
-      }).join('');
-    }
-
-    // Auto-refresh every 10 seconds
-    setInterval(() => {
-      const siteId = document.getElementById('siteIdInput').value.trim();
-      if (siteId) loadSite();
-    }, 10000);
-  </script>
+<script src="./dashboard.js" defer></script>
 </body>
 </html>
