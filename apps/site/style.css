@@ -1379,3 +1379,160 @@ html:not(.js) .reveal {
   .demo-url { display: none; }
   .demo-chrome { padding: 10px 14px; }
 }
+
+/* ============================================
+   BADGE ROW (hero) + X402 BADGE
+   ============================================ */
+.badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+.badge-row .badge { margin-bottom: 0; }
+.badge-x402 {
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(34, 211, 238, 0.15));
+  border-color: rgba(167, 139, 250, 0.4);
+  color: var(--color-text);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.badge-x402:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -10px rgba(167, 139, 250, 0.5);
+}
+.badge-x402 svg { color: rgba(167, 139, 250, 1); }
+
+/* ============================================
+   X402 / AGENTIC.MARKET SECTION
+   ============================================ */
+.x402 {
+  position: relative;
+}
+.x402::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.06), transparent 50%);
+  pointer-events: none;
+}
+.x402-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--space-6);
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.x402-card {
+  background: linear-gradient(180deg, rgba(20, 24, 32, 0.7), rgba(14, 17, 22, 0.9));
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: var(--space-6);
+  position: relative;
+  overflow: hidden;
+}
+.x402-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.3), transparent 40%, transparent 60%, rgba(34, 211, 238, 0.3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+.x402-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+.x402-tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 4px 8px;
+  background: rgba(34, 211, 238, 0.15);
+  color: rgb(34, 211, 238);
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+.x402-route {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  font-weight: 500;
+}
+.x402-price {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: rgb(167, 139, 250);
+  font-weight: 600;
+}
+.x402-desc {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+  line-height: 1.55;
+}
+.x402-code {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--color-text);
+  overflow-x: auto;
+  margin-bottom: var(--space-3);
+  white-space: pre;
+}
+.x402-out {
+  color: rgb(34, 211, 238);
+  margin-bottom: 0;
+}
+.x402-card-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+.x402-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.x402-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: var(--text-sm);
+}
+.x402-meta-row:last-child { border-bottom: none; }
+.x402-meta-row span:first-child {
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--text-xs);
+}
+.x402-meta-row .mono {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+}
+.x402-cta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.x402-cta-stack .btn { justify-content: center; }
+@media (max-width: 880px) {
+  .x402-grid { grid-template-columns: 1fr; }
+}

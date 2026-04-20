@@ -9,6 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 const { evaluateEvent } = require('./policyEngine');
 const { scoreRisk } = require('./detection');
 const { SEED_EVENTS } = require('./seed');
+const { attachX402, PAY_TO, NETWORK } = require('./x402');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -75,6 +76,68 @@ function broadcast(siteId, payload) {
     try { res.write(line); } catch (_) { /* ignore */ }
   }
 }
+
+// -- Stateless scan helper (powers /v1/scan and /v1/scan-public) -------------
+function runScan(body) {
+  const start = Date.now();
+  const event = {
+    id: 'scan-' + Math.random().toString(36).slice(2, 10),
+    siteId: body.siteId || 'x402-direct',
+    type: body.type,
+    path: body.path || '/',
+    ip: body.ip || '0.0.0.0',
+    userAgent: body.userAgent || '',
+    payload: body.payload || {},
+    agentAction: body.agentAction || null,
+    timestamp: new Date().toISOString(),
+  };
+  const policy = evaluateEvent(event);
+  const risk = scoreRisk(event);
+  return {
+    decision: policy.decision,
+    risk,
+    reasons: policy.reasons,
+    latencyMs: Date.now() - start,
+  };
+}
+
+// Lightweight in-memory rate limit for /v1/scan-public (free tier).
+const publicHits = new Map(); // ip -> { count, resetAt }
+function publicRateLimit(req, res, next) {
+  const ip = req.ip || '0.0.0.0';
+  const now = Date.now();
+  const slot = publicHits.get(ip);
+  if (!slot || now > slot.resetAt) {
+    publicHits.set(ip, { count: 1, resetAt: now + 60_000 });
+    return next();
+  }
+  if (slot.count >= 30) {
+    return res.status(429).json({
+      error: 'rate_limited',
+      message: 'Free tier: 30 calls/min/IP. Pay $0.0005/call via x402 for unlimited.',
+      x402Endpoint: '/v1/scan',
+    });
+  }
+  slot.count += 1;
+  next();
+}
+
+// -- x402 paid endpoint ------------------------------------------------------
+// Mount BEFORE we define POST /v1/scan so the middleware intercepts.
+attachX402(app);
+
+app.post('/v1/scan', (req, res) => {
+  const body = req.body || {};
+  if (!body.type) return res.status(400).json({ error: 'type is required' });
+  res.json(runScan(body));
+});
+
+// -- Free preview endpoint (rate-limited) ------------------------------------
+app.post('/v1/scan-public', publicRateLimit, (req, res) => {
+  const body = req.body || {};
+  if (!body.type) return res.status(400).json({ error: 'type is required' });
+  res.json({ ...runScan(body), tier: 'public-preview' });
+});
 
 // -- Routes ------------------------------------------------------------------
 
@@ -179,6 +242,19 @@ function startLiveFeed(siteId = 'demo-acme-shop') {
 }
 
 // Start
+app.get('/x402-info', (_, res) => {
+  res.json({
+    payTo: PAY_TO,
+    network: NETWORK,
+    facilitator: 'https://x402.org/facilitator',
+    routes: {
+      paid: { method: 'POST', path: '/v1/scan', price: '$0.0005' },
+      free: { method: 'POST', path: '/v1/scan-public', limit: '30/min/ip' },
+    },
+    docs: 'https://github.com/locallaunchsc-cloud/unifiedsphinx#x402',
+  });
+});
+
 app.listen(PORT, HOST, () => {
   console.log(`UnifiedSphinx API listening on ${HOST}:${PORT}`);
   seedDemo();

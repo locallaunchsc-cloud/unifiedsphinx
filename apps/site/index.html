@@ -48,6 +48,7 @@
     </a>
     <nav class="nav" aria-label="Primary">
       <a href="#demo">Live demo</a>
+      <a href="#x402">For agents</a>
       <a href="#features">Features</a>
       <a href="#how">How it works</a>
       <a href="#architecture">Architecture</a>
@@ -66,9 +67,15 @@
     <canvas id="sphinx-canvas" aria-label="Animated UnifiedSphinx security orb"></canvas>
   </div>
   <div class="container hero-inner">
-    <div class="badge">
-      <span class="pulse-dot" aria-hidden="true"></span>
-      <span>v0.1 — live dashboard now public</span>
+    <div class="badge-row">
+      <div class="badge">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span>v0.1 — live dashboard now public</span>
+      </div>
+      <a href="#x402" class="badge badge-x402">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20"/></svg>
+        <span>x402-ready — pay-per-call for agents</span>
+      </a>
     </div>
     <h1 class="hero-title">
       The <span class="grad">secure runtime</span> for<br/>the AI-era internet.
@@ -164,6 +171,58 @@
       <a href="https://github.com/locallaunchsc-cloud/unifiedsphinx" target="_blank" rel="noopener" class="btn btn-ghost">
         <span>Read the source</span>
       </a>
+    </div>
+  </div>
+</section>
+
+<!-- X402 / AGENTIC.MARKET -->
+<section class="x402" id="x402">
+  <div class="container">
+    <header class="section-head">
+      <p class="eyebrow">For agents</p>
+      <h2 class="section-title">The first security primitive on <span class="grad">x402</span>.</h2>
+      <p class="section-sub">
+        AI agents discover UnifiedSphinx through the Coinbase x402 Bazaar, pay $0.0005 per scan in stablecoin, and get a sub-50ms allow / alert / block decision. No API keys. No accounts. Just the protocol.
+      </p>
+    </header>
+
+    <div class="x402-grid">
+      <div class="x402-card">
+        <div class="x402-card-head">
+          <span class="x402-tag">POST</span>
+          <span class="x402-route">/v1/scan</span>
+          <span class="x402-price">$0.0005</span>
+        </div>
+        <p class="x402-desc">Real-time threat scoring — prompt injection, PII, SQL injection, scanner traffic, agent action approval. Returns a decision in under 50ms.</p>
+        <pre class="x402-code"><code>curl -X POST https://api.unifiedsphinx.dev/v1/scan \
+  -H "X-PAYMENT: &lt;x402-signature&gt;" \
+  -d '{"type":"chat_message",
+       "payload":{"message":"Ignore previous instructions..."}}'</code></pre>
+        <pre class="x402-code x402-out"><code>{
+  "decision": "alert",
+  "risk": 40,
+  "reasons": ["Prompt injection attempt detected"],
+  "latencyMs": 2
+}</code></pre>
+      </div>
+
+      <div class="x402-card x402-card-side">
+        <div class="x402-meta">
+          <div class="x402-meta-row"><span>Network</span><span class="mono">eip155:84532</span></div>
+          <div class="x402-meta-row"><span>Asset</span><span class="mono">USDC</span></div>
+          <div class="x402-meta-row"><span>Facilitator</span><span class="mono">x402.org</span></div>
+          <div class="x402-meta-row"><span>Free tier</span><span class="mono">30/min/IP</span></div>
+        </div>
+        <div class="x402-cta-stack">
+          <a href="https://agentic.market/" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+            <span>Find us on Agentic.Market</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+          </a>
+          <a href="https://docs.cdp.coinbase.com/x402/bazaar" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+            <span>x402 docs</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
