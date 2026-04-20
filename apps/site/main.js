@@ -48,20 +48,51 @@ document.documentElement.classList.add('js');
   });
 })();
 
-// Waitlist form
-window.joinWaitlist = function (e) {
-  e.preventDefault();
-  const note = document.getElementById('form-note');
-  const email = document.getElementById('email');
-  if (!email.value || !email.checkValidity()) {
-    note.textContent = 'Enter a valid email address.';
-    note.classList.remove('success');
-    return;
-  }
-  note.textContent = `You're on the list. We'll reach out from team@unifiedsphinx.dev.`;
-  note.classList.add('success');
-  email.value = '';
-};
+// Waitlist form submission — opens prefilled Airtable form in new tab
+(function waitlistForm() {
+  const form = document.getElementById('waitlist-form');
+  if (!form) return;
+  const AIRTABLE_FORM = 'https://airtable.com/appnhaB59pRM5domJ/shr6Mvh6QXyB9r5sh';
+  const successEl = document.getElementById('wl-success');
+  const submitBtn = document.getElementById('wl-submit');
+  const submitLabel = submitBtn?.querySelector('.form-submit-label');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('wl-email');
+    const email = (emailInput?.value || '').trim();
+    const tier = form.querySelector('input[name="tier"]:checked')?.value || 'Open Core';
+
+    // Minimal client-side validation
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk) {
+      emailInput?.focus();
+      emailInput?.setAttribute('aria-invalid', 'true');
+      form.classList.add('has-error');
+      return;
+    }
+    form.classList.remove('has-error');
+    emailInput?.removeAttribute('aria-invalid');
+
+    // Build prefilled Airtable URL
+    const params = new URLSearchParams({
+      'prefill_Email': email,
+      'prefill_Source': 'landing_page',
+      'prefill_Tier Interest': tier,
+      'hide_Source': 'true',
+    });
+    const url = `${AIRTABLE_FORM}?${params.toString()}`;
+
+    // Open Airtable form in a new tab so user can finish/confirm there
+    window.open(url, '_blank', 'noopener,noreferrer');
+
+    // Optimistic UI: show success, swap button
+    if (successEl) successEl.hidden = false;
+    if (submitLabel) submitLabel.textContent = 'Opened — confirm in new tab';
+    submitBtn?.setAttribute('disabled', 'true');
+    submitBtn?.classList.add('is-done');
+  });
+})();
 
 // Smooth anchor scroll with header offset
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
