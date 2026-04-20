@@ -9,10 +9,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "@coinbase/x402": "^2.1.0",
+    "axios": "^1.15.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.18.2",
     "uuid": "^9.0.0",
     "viem": "^2.48.1",
+    "x402-axios": "^1.2.0",
     "x402-express": "^1.2.0"
   },
   "devDependencies": {

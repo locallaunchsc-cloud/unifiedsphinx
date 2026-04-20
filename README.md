@@ -133,10 +133,19 @@ const { decision, risk, reasons } = await res.json();
 
 Services auto-index after the first payment settles through Coinbase's CDP facilitator. To complete the listing:
 
-1. Sign up for [Coinbase Developer Platform](https://docs.cdp.coinbase.com/) and create API keys.
-2. Set `X402_FACILITATOR=https://api.cdp.coinbase.com/platform/v2/x402` and the CDP keys.
-3. Make one paid call from any funded wallet to `/v1/scan` — the listing appears automatically.
-4. Search [agentic.market](https://agentic.market/) for "unifiedsphinx" or category `security`.
+1. Sign up for [Coinbase Developer Platform](https://portal.cdp.coinbase.com/) and create an API key. Save the **Key ID** and **Secret** somewhere safe (the secret is only shown once).
+2. Copy `services/api/.env.example` to `.env` and fill in `CDP_API_KEY_SECRET` (the Key ID is already set).
+3. Start the API: `cd services/api && npm install && node index.js`
+4. In another terminal, run the listing trigger:
+
+   ```bash
+   cd services/api
+   export CDP_API_KEY_SECRET="<your secret>"
+   node scripts/trigger-listing.js
+   ```
+
+   The script generates a buyer wallet, prints its address, and waits while you fund it with Base Sepolia USDC at [faucet.circle.com](https://faucet.circle.com). Re-run after funding — it will make one paid call through CDP's facilitator and poll until `/v1/scan` shows up in the [Agentic.Market](https://agentic.market/) discovery feed.
+5. Search [agentic.market](https://agentic.market/) for "unifiedsphinx" or category `security`.
 
 ---
 
