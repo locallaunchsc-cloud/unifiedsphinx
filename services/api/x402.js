@@ -35,7 +35,7 @@ const PRICE = process.env.X402_PRICE || '$0.0005';
 // CDP credentials. Key ID is non-secret and can default; secret is env-only.
 // Default Key ID belongs to the UnifiedSphinx project on CDP.
 const CDP_API_KEY_ID =
-  process.env.CDP_API_KEY_ID || 'aa9c783d-6990-4e27-9be8-ea21de1bd3ea';
+  process.env.CDP_API_KEY_ID || '80d57fd8-9b85-402b-a6c1-4b9141efa010';
 const CDP_API_KEY_SECRET = process.env.CDP_API_KEY_SECRET; // never default
 
 function buildFacilitatorConfig() {
