@@ -88,17 +88,11 @@ async function pollMerchantDiscovery({ payTo, attempts = 30, delayMs = 5000 }) {
   return null;
 }
 
-function ensureSecret() {
-  if (!CDP_KEY_SECRET) {
-    console.error(
-      '\nERROR: CDP_API_KEY_SECRET is not set.\n' +
-        '       Export it before running this script:\n' +
-        '         export CDP_API_KEY_SECRET="<your secret>"\n' +
-        '       Get one at https://portal.cdp.coinbase.com/\n',
-    );
-    process.exit(1);
-  }
-}
+// CDP key is OPTIONAL. Without it the script still makes the paid call
+// against the x402.org facilitator (which settles real Base Sepolia USDC),
+// but the merchant-discovery polling step is skipped because Agentic.Market
+// only indexes services whose facilitator is CDP.
+const CDP_AVAILABLE = Boolean(CDP_KEY_SECRET);
 
 const fs = require('fs');
 const BUYER_KEY_FILE = path.join(__dirname, '..', '.buyer-key');
@@ -132,7 +126,12 @@ function loadBuyer() {
 
 (async () => {
   console.log('UnifiedSphinx → Agentic.Market listing trigger\n');
-  ensureSecret();
+  if (!CDP_AVAILABLE) {
+    console.log(
+      '(no CDP_API_KEY_SECRET set — paying via public x402.org facilitator;\n' +
+      ' Agentic.Market discovery polling will be skipped)\n',
+    );
+  }
 
   const { account, generated, source } = loadBuyer();
   console.log(`Buyer wallet:     ${account.address}`);
@@ -215,7 +214,14 @@ function loadBuyer() {
   console.log(`  risk:     ${scanRes.data?.risk}`);
   console.log(`  reasons:  ${JSON.stringify(scanRes.data?.reasons)}\n`);
 
-  // 3. Poll discovery.
+  // 3. Poll discovery (only meaningful when paying via CDP facilitator).
+  if (!CDP_AVAILABLE) {
+    console.log(
+      'Skipping merchant-discovery poll (x402.org facilitator is not\n' +
+      'indexed by Agentic.Market). Payment confirmed via HTTP 200 above.\n',
+    );
+    return;
+  }
   console.log('Polling CDP merchant discovery for listing ...');
   const listing = await pollMerchantDiscovery({ payTo: PAY_TO });
   if (listing) {
