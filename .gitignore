@@ -5,3 +5,7 @@ node_modules/
 .env.*
 dist/
 build/
+demo-video/
+demo.webm
+demo.mp4
+record-demo.js
